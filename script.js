@@ -21,9 +21,19 @@ const modalDescription = document.getElementById('modalDescription');
 const closeModal = document.getElementById('closeModal');
 const loading = document.getElementById('loading');
 const filterButtons = document.querySelectorAll('.filter-btn');
+const prevBtn = document.getElementById('prevBtn');
+const nextBtn = document.getElementById('nextBtn');
+const currentIndexEl = document.getElementById('currentIndex');
+const totalCountEl = document.getElementById('totalCount');
+const modalIndicators = document.getElementById('modalIndicators');
 
 // State
 let currentFilter = 'all';
+let currentModalIndex = 0;
+let filteredMediaFiles = [...mediaFiles];
+let isAutoPlaying = false;
+let touchStartX = 0;
+let touchEndX = 0;
 
 // Initialize the application
 document.addEventListener('DOMContentLoaded', function() {
@@ -114,11 +124,63 @@ function setupEventListeners() {
         }
     });
     
+    // Modal navigation buttons
+    prevBtn.addEventListener('click', showPrevMedia);
+    nextBtn.addEventListener('click', showNextMedia);
+    
     // Keyboard navigation
     document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape' && modal.style.display === 'block') {
-            closeModalHandler();
+        if (modal.style.display === 'block') {
+            switch(e.key) {
+                case 'Escape':
+                    closeModalHandler();
+                    break;
+                case 'ArrowLeft':
+                    e.preventDefault();
+                    showPrevMedia();
+                    break;
+                case 'ArrowRight':
+                    e.preventDefault();
+                    showNextMedia();
+                    break;
+            }
         }
+    });
+    
+    // Touch/swipe events for modal
+    modalMedia.addEventListener('touchstart', handleTouchStart, { passive: true });
+    modalMedia.addEventListener('touchend', handleTouchEnd, { passive: true });
+    
+    // Mouse drag events for modal (optional)
+    let isMouseDown = false;
+    let mouseStartX = 0;
+    
+    modalMedia.addEventListener('mousedown', function(e) {
+        isMouseDown = true;
+        mouseStartX = e.clientX;
+        e.preventDefault();
+    });
+    
+    document.addEventListener('mousemove', function(e) {
+        if (isMouseDown && modal.style.display === 'block') {
+            e.preventDefault();
+        }
+    });
+    
+    document.addEventListener('mouseup', function(e) {
+        if (isMouseDown && modal.style.display === 'block') {
+            const mouseEndX = e.clientX;
+            const diff = mouseStartX - mouseEndX;
+            
+            if (Math.abs(diff) > 100) { // Minimum swipe distance
+                if (diff > 0) {
+                    showNextMedia();
+                } else {
+                    showPrevMedia();
+                }
+            }
+        }
+        isMouseDown = false;
     });
     
     // Handle video hover effects
@@ -154,6 +216,15 @@ function setActiveFilter(filter) {
 function filterMedia(filter) {
     const mediaItems = document.querySelectorAll('.media-item');
     
+    // Update filtered media files array
+    if (filter === 'all') {
+        filteredMediaFiles = [...mediaFiles];
+    } else if (filter === 'images') {
+        filteredMediaFiles = mediaFiles.filter(file => file.type === 'image');
+    } else if (filter === 'videos') {
+        filteredMediaFiles = mediaFiles.filter(file => file.type === 'video');
+    }
+    
     mediaItems.forEach(item => {
         const itemType = item.getAttribute('data-type');
         
@@ -170,10 +241,37 @@ function filterMedia(filter) {
             item.classList.add('hidden');
         }
     });
+    
+    // Update total count in modal
+    updateModalIndicators();
 }
 
 // Open modal with media
 function openModal(file, index) {
+    // Find the index in filtered media files
+    currentModalIndex = filteredMediaFiles.findIndex(f => f.name === file.name);
+    if (currentModalIndex === -1) currentModalIndex = 0;
+    
+    updateModalContent();
+    updateModalIndicators();
+    updateNavigationButtons();
+    
+    modal.style.display = 'block';
+    document.body.style.overflow = 'hidden';
+    
+    // Add fade-in animation
+    modal.style.opacity = '0';
+    setTimeout(() => {
+        modal.style.transition = 'opacity 0.3s ease-in-out';
+        modal.style.opacity = '1';
+    }, 10);
+}
+
+// Update modal content
+function updateModalContent() {
+    const file = filteredMediaFiles[currentModalIndex];
+    if (!file) return;
+    
     modalMedia.innerHTML = '';
     
     let mediaElement;
@@ -186,22 +284,98 @@ function openModal(file, index) {
         mediaElement.src = file.name;
         mediaElement.controls = true;
         mediaElement.autoplay = true;
-        mediaElement.loop = true;
+        mediaElement.muted = false;
+        
+        // Add event listener for auto-advance when video ends
+        mediaElement.addEventListener('ended', function() {
+            if (currentModalIndex < filteredMediaFiles.length - 1) {
+                setTimeout(() => {
+                    showNextMedia();
+                }, 1000); // Wait 1 second before auto-advancing
+            }
+        });
     }
     
     modalMedia.appendChild(mediaElement);
     modalTitle.textContent = file.title;
     modalDescription.textContent = `${file.type === 'image' ? 'Image' : 'Video'} file: ${file.name}`;
     
-    modal.style.display = 'block';
-    document.body.style.overflow = 'hidden';
+    // Update counter
+    currentIndexEl.textContent = currentModalIndex + 1;
+    totalCountEl.textContent = filteredMediaFiles.length;
+}
+
+// Show previous media
+function showPrevMedia() {
+    if (currentModalIndex > 0) {
+        slideToMedia(currentModalIndex - 1, 'right');
+    }
+}
+
+// Show next media
+function showNextMedia() {
+    if (currentModalIndex < filteredMediaFiles.length - 1) {
+        slideToMedia(currentModalIndex + 1, 'left');
+    }
+}
+
+// Slide to specific media with animation
+function slideToMedia(newIndex, direction) {
+    const modalMediaEl = modalMedia;
     
-    // Add fade-in animation
-    modal.style.opacity = '0';
+    // Add slide-out animation
+    modalMediaEl.classList.add(`slide-out-${direction}`);
+    
     setTimeout(() => {
-        modal.style.transition = 'opacity 0.3s ease-in-out';
-        modal.style.opacity = '1';
-    }, 10);
+        currentModalIndex = newIndex;
+        updateModalContent();
+        updateNavigationButtons();
+        updateIndicatorDots();
+        
+        // Reset and add slide-in animation
+        modalMediaEl.classList.remove(`slide-out-${direction}`);
+        modalMediaEl.classList.add(`slide-in-${direction === 'left' ? 'right' : 'left'}`);
+        
+        setTimeout(() => {
+            modalMediaEl.classList.remove(`slide-in-${direction === 'left' ? 'right' : 'left'}`);
+        }, 300);
+    }, 300);
+}
+
+// Update navigation buttons state
+function updateNavigationButtons() {
+    prevBtn.disabled = currentModalIndex === 0;
+    nextBtn.disabled = currentModalIndex === filteredMediaFiles.length - 1;
+}
+
+// Update modal indicators
+function updateModalIndicators() {
+    modalIndicators.innerHTML = '';
+    
+    filteredMediaFiles.forEach((_, index) => {
+        const dot = document.createElement('div');
+        dot.className = 'indicator-dot';
+        if (index === currentModalIndex) {
+            dot.classList.add('active');
+        }
+        
+        dot.addEventListener('click', () => {
+            if (index !== currentModalIndex) {
+                const direction = index > currentModalIndex ? 'left' : 'right';
+                slideToMedia(index, direction);
+            }
+        });
+        
+        modalIndicators.appendChild(dot);
+    });
+}
+
+// Update indicator dots without recreating them
+function updateIndicatorDots() {
+    const dots = modalIndicators.querySelectorAll('.indicator-dot');
+    dots.forEach((dot, index) => {
+        dot.classList.toggle('active', index === currentModalIndex);
+    });
 }
 
 // Close modal
@@ -297,6 +471,31 @@ function setupLazyLoading() {
         videos.forEach(video => {
             videoObserver.observe(video);
         });
+    }
+}
+
+// Touch handling functions
+function handleTouchStart(e) {
+    touchStartX = e.touches[0].clientX;
+}
+
+function handleTouchEnd(e) {
+    touchEndX = e.changedTouches[0].clientX;
+    handleSwipeGesture();
+}
+
+function handleSwipeGesture() {
+    const swipeThreshold = 100; // Minimum distance for swipe
+    const diff = touchStartX - touchEndX;
+    
+    if (Math.abs(diff) > swipeThreshold) {
+        if (diff > 0) {
+            // Swiped left - show next
+            showNextMedia();
+        } else {
+            // Swiped right - show previous
+            showPrevMedia();
+        }
     }
 }
 

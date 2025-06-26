@@ -198,6 +198,7 @@ body {
     height: 100%;
     background: rgba(0, 0, 0, 0.9);
     backdrop-filter: blur(5px);
+    user-select: none;
 }
 
 .modal-content {
@@ -228,12 +229,84 @@ body {
     transform: scale(1.1);
 }
 
+/* Navigation buttons */
+.modal-nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    color: white;
+    font-size: 2rem;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: var(--transition);
+    z-index: 1001;
+    backdrop-filter: blur(10px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0.7;
+}
+
+.modal-nav:hover {
+    background: rgba(255, 255, 255, 0.3);
+    opacity: 1;
+    transform: translateY(-50%) scale(1.1);
+}
+
+.prev-btn {
+    left: -25px;
+}
+
+.next-btn {
+    right: -25px;
+}
+
+.modal-nav:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+    transform: translateY(-50%);
+}
+
+.modal-nav:disabled:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: translateY(-50%);
+}
+
+/* Media container with swipe support */
+.modal-media {
+    position: relative;
+    overflow: hidden;
+    touch-action: pan-y;
+}
+
 .modal-media img,
 .modal-media video {
     max-width: 100%;
     max-height: 70vh;
     border-radius: var(--border-radius);
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    transition: transform 0.3s ease-out;
+}
+
+/* Swipe animation classes */
+.modal-media.slide-out-left {
+    transform: translateX(-100%);
+}
+
+.modal-media.slide-out-right {
+    transform: translateX(100%);
+}
+
+.modal-media.slide-in-left {
+    transform: translateX(-100%);
+}
+
+.modal-media.slide-in-right {
+    transform: translateX(100%);
 }
 
 .modal-info {
@@ -250,6 +323,59 @@ body {
 .modal-info p {
     font-size: 1.1rem;
     color: #bdc3c7;
+    margin-bottom: 0.5rem;
+}
+
+/* Media counter */
+.media-counter {
+    font-size: 0.9rem;
+    color: #95a5a6;
+    margin-top: 0.5rem;
+}
+
+/* Modal indicators */
+.modal-indicators {
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-top: 1rem;
+}
+
+.indicator-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.3);
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.indicator-dot.active {
+    background: white;
+    transform: scale(1.2);
+}
+
+.indicator-dot:hover {
+    background: rgba(255, 255, 255, 0.6);
+}
+
+/* Auto-play indicator */
+.autoplay-indicator {
+    position: absolute;
+    top: 1rem;
+    left: 2rem;
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    z-index: 1001;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.autoplay-indicator.show {
+    opacity: 1;
 }
 
 /* Loading styles */
@@ -333,6 +459,30 @@ body {
         top: 0.5rem;
         right: 1rem;
         font-size: 1.5rem;
+    }
+    
+    /* Mobile navigation buttons */
+    .prev-btn {
+        left: 10px;
+        width: 40px;
+        height: 40px;
+        font-size: 1.5rem;
+    }
+    
+    .next-btn {
+        right: 10px;
+        width: 40px;
+        height: 40px;
+        font-size: 1.5rem;
+    }
+    
+    .modal-indicators {
+        margin-top: 0.5rem;
+    }
+    
+    .indicator-dot {
+        width: 10px;
+        height: 10px;
     }
 }
 
