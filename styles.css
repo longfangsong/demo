@@ -378,6 +378,32 @@ body {
     opacity: 1;
 }
 
+/* iOS video fixes */
+video {
+    -webkit-playsinline: true;
+}
+
+/* Custom play button for iOS */
+.video-play-button {
+    pointer-events: auto;
+}
+
+.video-play-button:hover {
+    background: rgba(0, 0, 0, 0.9) !important;
+    transform: translate(-50%, -50%) scale(1.1) !important;
+}
+
+/* Hide default video controls overlay on iOS */
+video::-webkit-media-controls-overlay-play-button {
+    display: none !important;
+    -webkit-appearance: none;
+}
+
+video::-webkit-media-controls-start-playback-button {
+    display: none !important;
+    -webkit-appearance: none;
+}
+
 /* Loading styles */
 .loading {
     position: fixed;

@@ -72,6 +72,8 @@ function createMediaItem(file, index) {
         mediaElement.src = file.name;
         mediaElement.muted = true;
         mediaElement.preload = 'metadata';
+        mediaElement.playsInline = true; // Prevent fullscreen on iOS
+        mediaElement.setAttribute('playsinline', ''); // iOS compatibility
         
         // Add play overlay for videos
         const playOverlay = document.createElement('div');
@@ -187,9 +189,12 @@ function setupEventListeners() {
     document.addEventListener('mouseover', function(e) {
         if (e.target.tagName === 'VIDEO' && e.target.closest('.media-item')) {
             e.target.currentTime = 0;
-            e.target.play().catch(() => {
-                // Handle autoplay restrictions
-            });
+            const playPromise = e.target.play();
+            if (playPromise !== undefined) {
+                playPromise.catch(() => {
+                    // Handle autoplay restrictions silently for hover
+                });
+            }
         }
     });
     
@@ -285,6 +290,9 @@ function updateModalContent() {
         mediaElement.controls = true;
         mediaElement.autoplay = true;
         mediaElement.muted = false;
+        mediaElement.playsInline = true; // Prevent fullscreen on iOS
+        mediaElement.setAttribute('playsinline', ''); // iOS compatibility
+        mediaElement.setAttribute('webkit-playsinline', ''); // Older iOS Safari compatibility
         
         // Add event listener for auto-advance when video ends
         mediaElement.addEventListener('ended', function() {
@@ -292,6 +300,19 @@ function updateModalContent() {
                 setTimeout(() => {
                     showNextMedia();
                 }, 1000); // Wait 1 second before auto-advancing
+            }
+        });
+        
+        // Handle autoplay restrictions on iOS
+        mediaElement.addEventListener('loadedmetadata', function() {
+            // Try to play the video, handle restrictions gracefully
+            const playPromise = mediaElement.play();
+            if (playPromise !== undefined) {
+                playPromise.catch(error => {
+                    console.log('Autoplay prevented:', error);
+                    // Show a play button or indicator that user needs to interact
+                    showPlayButton(mediaElement);
+                });
             }
         });
     }
@@ -472,6 +493,40 @@ function setupLazyLoading() {
             videoObserver.observe(video);
         });
     }
+}
+
+// Show play button when autoplay is prevented
+function showPlayButton(videoElement) {
+    const playButton = document.createElement('div');
+    playButton.className = 'video-play-button';
+    playButton.innerHTML = '▶';
+    playButton.style.cssText = `
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: rgba(0, 0, 0, 0.8);
+        color: white;
+        border-radius: 50%;
+        width: 80px;
+        height: 80px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2rem;
+        cursor: pointer;
+        z-index: 10;
+        transition: all 0.3s ease;
+    `;
+    
+    playButton.addEventListener('click', function() {
+        videoElement.play();
+        playButton.remove();
+    });
+    
+    // Add to the modal media container
+    modalMedia.style.position = 'relative';
+    modalMedia.appendChild(playButton);
 }
 
 // Touch handling functions
