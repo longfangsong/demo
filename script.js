@@ -287,12 +287,25 @@ function updateModalContent() {
     } else {
         mediaElement = document.createElement('video');
         mediaElement.src = file.name;
-        mediaElement.controls = true;
+        mediaElement.controls = false; // Hide default controls on iOS
         mediaElement.autoplay = true;
         mediaElement.muted = false;
         mediaElement.playsInline = true; // Prevent fullscreen on iOS
         mediaElement.setAttribute('playsinline', ''); // iOS compatibility
         mediaElement.setAttribute('webkit-playsinline', ''); // Older iOS Safari compatibility
+        
+        // Add custom video controls
+        addCustomVideoControls(mediaElement);
+        
+        // Add click to play/pause functionality
+        mediaElement.addEventListener('click', function(e) {
+            e.stopPropagation();
+            if (mediaElement.paused) {
+                mediaElement.play();
+            } else {
+                mediaElement.pause();
+            }
+        });
         
         // Add event listener for auto-advance when video ends
         mediaElement.addEventListener('ended', function() {
@@ -493,6 +506,167 @@ function setupLazyLoading() {
             videoObserver.observe(video);
         });
     }
+}
+
+// Add custom video controls
+function addCustomVideoControls(videoElement) {
+    // Create controls container
+    const controlsContainer = document.createElement('div');
+    controlsContainer.className = 'custom-video-controls';
+    controlsContainer.style.cssText = `
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: linear-gradient(transparent, rgba(0,0,0,0.8));
+        padding: 1rem;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        z-index: 15;
+    `;
+    
+    // Play/Pause button
+    const playPauseBtn = document.createElement('button');
+    playPauseBtn.className = 'play-pause-btn';
+    playPauseBtn.innerHTML = '⏸️';
+    playPauseBtn.style.cssText = `
+        background: none;
+        border: none;
+        color: white;
+        font-size: 1.5rem;
+        cursor: pointer;
+        margin-right: 1rem;
+    `;
+    
+    // Progress bar
+    const progressContainer = document.createElement('div');
+    progressContainer.style.cssText = `
+        flex: 1;
+        height: 4px;
+        background: rgba(255,255,255,0.3);
+        border-radius: 2px;
+        margin: 0 1rem;
+        cursor: pointer;
+        position: relative;
+    `;
+    
+    const progressBar = document.createElement('div');
+    progressBar.style.cssText = `
+        height: 100%;
+        background: white;
+        border-radius: 2px;
+        width: 0%;
+        transition: width 0.1s ease;
+    `;
+    progressContainer.appendChild(progressBar);
+    
+    // Time display
+    const timeDisplay = document.createElement('span');
+    timeDisplay.style.cssText = `
+        color: white;
+        font-size: 0.9rem;
+        min-width: 80px;
+    `;
+    timeDisplay.textContent = '0:00 / 0:00';
+    
+    // Assemble controls
+    const controlsRow = document.createElement('div');
+    controlsRow.style.cssText = `
+        display: flex;
+        align-items: center;
+        width: 100%;
+    `;
+    
+    controlsRow.appendChild(playPauseBtn);
+    controlsRow.appendChild(progressContainer);
+    controlsRow.appendChild(timeDisplay);
+    controlsContainer.appendChild(controlsRow);
+    
+    // Event listeners
+    playPauseBtn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        if (videoElement.paused) {
+            videoElement.play();
+            playPauseBtn.innerHTML = '⏸️';
+        } else {
+            videoElement.pause();
+            playPauseBtn.innerHTML = '▶️';
+        }
+    });
+    
+    // Progress bar click
+    progressContainer.addEventListener('click', function(e) {
+        e.stopPropagation();
+        const rect = progressContainer.getBoundingClientRect();
+        const clickX = e.clientX - rect.left;
+        const percentage = clickX / rect.width;
+        videoElement.currentTime = percentage * videoElement.duration;
+    });
+    
+    // Update progress and time
+    videoElement.addEventListener('timeupdate', function() {
+        if (videoElement.duration) {
+            const percentage = (videoElement.currentTime / videoElement.duration) * 100;
+            progressBar.style.width = percentage + '%';
+            
+            const current = formatTime(videoElement.currentTime);
+            const total = formatTime(videoElement.duration);
+            timeDisplay.textContent = `${current} / ${total}`;
+        }
+    });
+    
+    // Show/hide controls on hover/touch
+    let hideTimeout;
+    
+    function showControls() {
+        controlsContainer.style.opacity = '1';
+        clearTimeout(hideTimeout);
+        hideTimeout = setTimeout(() => {
+            if (!videoElement.paused) {
+                controlsContainer.style.opacity = '0';
+            }
+        }, 3000);
+    }
+    
+    function hideControls() {
+        if (!videoElement.paused) {
+            controlsContainer.style.opacity = '0';
+        }
+    }
+    
+    // Mouse events
+    videoElement.addEventListener('mouseenter', showControls);
+    videoElement.addEventListener('mousemove', showControls);
+    controlsContainer.addEventListener('mouseenter', showControls);
+    
+    // Touch events
+    videoElement.addEventListener('touchstart', showControls);
+    
+    // Video events
+    videoElement.addEventListener('play', function() {
+        playPauseBtn.innerHTML = '⏸️';
+        hideTimeout = setTimeout(hideControls, 3000);
+    });
+    
+    videoElement.addEventListener('pause', function() {
+        playPauseBtn.innerHTML = '▶️';
+        controlsContainer.style.opacity = '1';
+        clearTimeout(hideTimeout);
+    });
+    
+    // Add controls to modal media container
+    modalMedia.style.position = 'relative';
+    modalMedia.appendChild(controlsContainer);
+    
+    // Initial state
+    showControls();
+}
+
+// Format time helper function
+function formatTime(seconds) {
+    const mins = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
 }
 
 // Show play button when autoplay is prevented
