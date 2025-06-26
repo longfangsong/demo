@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Media Gallery</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header class="header">
+        <h1 class="title">Media Gallery</h1>
+        <p class="subtitle">A beautiful collection of images and videos</p>
+    </header>
+
+    <nav class="filter-nav">
+        <button class="filter-btn active" data-filter="all">All</button>
+        <button class="filter-btn" data-filter="images">Images</button>
+        <button class="filter-btn" data-filter="videos">Videos</button>
+    </nav>
+
+    <main class="gallery-container">
+        <div class="gallery" id="gallery">
+            <!-- Media items will be dynamically loaded here -->
+        </div>
+    </main>
+
+    <!-- Modal for viewing media in full screen -->
+    <div class="modal" id="modal">
+        <div class="modal-content">
+            <span class="close" id="closeModal">&times;</span>
+            <div class="modal-media" id="modalMedia">
+                <!-- Selected media will be displayed here -->
+            </div>
+            <div class="modal-info">
+                <h3 id="modalTitle"></h3>
+                <p id="modalDescription"></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading indicator -->
+    <div class="loading" id="loading">
+        <div class="spinner"></div>
+        <p>Loading media...</p>
+    </div>
+
+    <footer class="footer">
+        <p>&copy; 2024 Imagine A Lion Gallery. Made with ❤️</p>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html> 
