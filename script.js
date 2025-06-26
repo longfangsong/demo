@@ -35,11 +35,40 @@ let isAutoPlaying = false;
 let touchStartX = 0;
 let touchEndX = 0;
 
+function autoOpenFirstMedia() {
+    if (filteredMediaFiles.length > 0) {
+        const firstMedia = filteredMediaFiles[0];
+        console.log('Auto-opening first media:', firstMedia); // Debug log
+        
+        // Set the current modal index directly
+        currentModalIndex = 0;
+        
+        // Update all modal components
+        updateModalContent();
+        updateModalIndicators();
+        updateNavigationButtons();
+        
+        // Show modal immediately without animation delay
+        modal.style.display = 'block';
+        modal.style.opacity = '1';
+        document.body.style.overflow = 'hidden';
+        
+        // Show navigation hint for a few seconds
+        // setTimeout(() => {
+        //     showNavigationHint();
+        // }, 500); // Delay hint to ensure modal is fully visible
+    }
+}
+
 // Initialize the application
 document.addEventListener('DOMContentLoaded', function() {
     initializeGallery();
     setupEventListeners();
     hideLoading();
+
+    setTimeout(() => {
+        autoOpenFirstMedia();
+    }, 1000);
 });
 
 // Create gallery items
