@@ -1,14 +1,14 @@
 const mediaFiles = [
-    { name: '269a', type: 'image', title: 'Beautiful Lion Portrait A' },
-    { name: '269b', type: 'video', title: 'Lion in Motion B' },
-    { name: '269c', type: 'video', title: 'Lion in Motion C' },
-    { name: '269d', type: 'video', title: 'Lion in Motion D' },
-    { name: '269e', type: 'video', title: 'Lion in Motion E' },
-    { name: '269f', type: 'video', title: 'Lion in Motion F' },
-    { name: '269g', type: 'video', title: 'Lion in Motion G' },
-    { name: '269h', type: 'image', title: 'Beautiful Lion Portrait H' },
-    { name: '269i', type: 'image', title: 'Beautiful Lion Portrait I' },
-    { name: '269j', type: 'video', title: 'Lion in Motion J' }
+    { name: '269a', type: 'image' },
+    { name: '269b', type: 'video' },
+    { name: '269c', type: 'video' },
+    { name: '269d', type: 'video' },
+    { name: '269e', type: 'video' },
+    { name: '269f', type: 'video' },
+    { name: '269g', type: 'video' },
+    { name: '269h', type: 'image' },
+    { name: '269i', type: 'image' },
+    { name: '269j', type: 'video' }
 ];
 
 // DOM elements
@@ -61,7 +61,7 @@ function createMediaItem(file, index) {
     if (file.type === 'image') {
         mediaElement = document.createElement('img');
         mediaElement.src = `content/${file.name}.jpg`;
-        mediaElement.alt = file.title;
+        mediaElement.alt = file.name;
     } else {
         // For video preview, create a video element and initialize HLS for preview
         mediaElement = document.createElement('video');
@@ -96,25 +96,10 @@ function createMediaItem(file, index) {
     
     mediaWrapper.appendChild(mediaElement);
     
-    const mediaInfo = document.createElement('div');
-    mediaInfo.className = 'media-info';
-    
-    const mediaTitle = document.createElement('h3');
-    mediaTitle.className = 'media-title';
-    mediaTitle.textContent = file.title;
-    
-    const mediaType = document.createElement('span');
-    mediaType.className = `media-type ${file.type}`;
-    mediaType.textContent = file.type;
-    
-    mediaInfo.appendChild(mediaTitle);
-    mediaInfo.appendChild(mediaType);
-    
     mediaItem.appendChild(mediaWrapper);
-    mediaItem.appendChild(mediaInfo);
     
     // Add click event to open modal
-    mediaItem.addEventListener('click', () => openModal(file, index));
+    mediaItem.addEventListener('click', () => openModal(index));
     
     return mediaItem;
 }
@@ -156,7 +141,7 @@ function updateTotalCount() {
     }
 }
 
-function openModal(file, index) {
+function openModal(index) {
     currentModalIndex = index;
     modal.style.display = 'block';
     document.body.style.overflow = 'hidden';
@@ -169,11 +154,6 @@ function openModal(file, index) {
 
 function updateModalContent() {
     const file = mediaFiles[currentModalIndex];
-    
-    // Update modal title
-    if (modalTitle) {
-        modalTitle.textContent = file.title;
-    }
     
     // Update counter
     if (currentIndexEl) {
@@ -199,7 +179,7 @@ function createSwiperSlides() {
         if (file.type === 'image') {
             const img = document.createElement('img');
             img.src = `content/${file.name}.jpg`;
-            img.alt = file.title;
+            img.alt = file.name;
             img.id = `image${index}`;
             slide.appendChild(img);
         } else {
@@ -339,9 +319,6 @@ function handleVideoPlayback(index) {
 
 function updateModalInfo() {
     const file = mediaFiles[currentModalIndex];
-    if (modalTitle) {
-        modalTitle.textContent = file.title;
-    }
     if (currentIndexEl) {
         currentIndexEl.textContent = currentModalIndex + 1;
     }
