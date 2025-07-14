@@ -1,0 +1,48 @@
+# Global headers for all files
+/*
+  X-Frame-Options: SAMEORIGIN
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+
+# Headers for HLS video streams
+/*.m3u8
+  Content-Type: application/vnd.apple.mpegurl
+  Cache-Control: max-age=0, no-cache, no-store, must-revalidate
+  Access-Control-Allow-Origin: *
+  Access-Control-Allow-Methods: GET, HEAD, OPTIONS
+  Access-Control-Allow-Headers: Range
+
+# Headers for video segments
+/*.ts
+  Content-Type: video/mp2t
+  Cache-Control: max-age=31536000, immutable
+  Access-Control-Allow-Origin: *
+  Access-Control-Allow-Methods: GET, HEAD, OPTIONS
+  Access-Control-Allow-Headers: Range
+
+# Headers for images
+/*.jpg
+  Content-Type: image/jpeg
+  Cache-Control: max-age=31536000, immutable
+
+/*.jpeg
+  Content-Type: image/jpeg
+  Cache-Control: max-age=31536000, immutable
+
+/*.png
+  Content-Type: image/png
+  Cache-Control: max-age=31536000, immutable
+
+# Headers for static assets
+/*.css
+  Content-Type: text/css
+  Cache-Control: max-age=31536000, immutable
+
+/*.js
+  Content-Type: application/javascript
+  Cache-Control: max-age=31536000, immutable
+
+# HTML files
+/*.html
+  Content-Type: text/html; charset=utf-8
+  Cache-Control: max-age=0, no-cache, no-store, must-revalidate 

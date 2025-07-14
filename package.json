@@ -1,0 +1,22 @@
+{
+  "name": "media-gallery",
+  "version": "1.0.0",
+  "description": "A beautiful media gallery with image and video support",
+  "main": "index.html",
+  "scripts": {},
+  "keywords": [
+    "media",
+    "gallery",
+    "images",
+    "videos",
+    "hls",
+    "responsive"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  }
+} 
