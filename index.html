@@ -1,22 +1,16 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Media Gallery</title>
-    <link rel="stylesheet" href="styles.css">
-</head>
-<body>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
     <header class="header">
         <h1 class="title">Media Gallery</h1>
         <p class="subtitle">A beautiful collection of images and videos</p>
     </header>
-
-    <nav class="filter-nav">
-        <button class="filter-btn active" data-filter="all">All</button>
-        <button class="filter-btn" data-filter="images">Images</button>
-        <button class="filter-btn" data-filter="videos">Videos</button>
-    </nav>
 
     <main class="gallery-container">
         <div class="gallery" id="gallery">
@@ -26,34 +20,36 @@
 
     <!-- Modal for viewing media in full screen -->
     <div class="modal" id="modal">
-        <div class="modal-content">
-            <span class="close" id="closeModal">&times;</span>
-            
-            <!-- Navigation buttons -->
-            <button class="modal-nav prev-btn" id="prevBtn">
-                <span>‹</span>
-            </button>
-            <button class="modal-nav next-btn" id="nextBtn">
-                <span>›</span>
-            </button>
-            
-            <div class="modal-media" id="modalMedia">
-                <!-- Selected media will be displayed here -->
+      <div class="modal-content">
+        <span class="close" id="closeModal">&times;</span>
+        <!-- Navigation buttons -->
+        <button class="modal-nav prev-btn" id="prevBtn">
+          <span>‹</span>
+        </button>
+        <button class="modal-nav next-btn" id="nextBtn">
+          <span>›</span>
+        </button>
+
+        <div class="modal-media" id="modalMedia">
+          <div id="slider" class="swipe">
+            <div class="swipe-wrap">
+              <!-- Slides are dynamically created here -->
             </div>
-            
-            <div class="modal-info">
-                <h3 id="modalTitle"></h3>
-                <p id="modalDescription"></p>
-                <div class="media-counter">
-                    <span id="currentIndex">1</span> / <span id="totalCount">10</span>
-                </div>
-            </div>
-            
-            <!-- Progress indicators -->
-            <div class="modal-indicators" id="modalIndicators">
-                <!-- Dots will be generated dynamically -->
+          </div>
+        </div>
+        
+        <div class="modal-info">
+            <h3 id="modalTitle"></h3>
+            <div class="media-counter">
+                <span id="currentIndex">1</span> / <span id="totalCount">10</span>
             </div>
         </div>
+        
+        <!-- Progress indicators -->
+        <div class="modal-indicators" id="modalIndicators">
+            <!-- Dots will be generated dynamically -->
+        </div>
+      </div>
     </div>
 
     <!-- Loading indicator -->
@@ -61,11 +57,9 @@
         <div class="spinner"></div>
         <p>Loading media...</p>
     </div>
-
-    <footer class="footer">
-        <p>&copy; 2024 Imagine A Lion Gallery. Made with ❤️</p>
-    </footer>
-
+    
+    <script src="https://cdn.jsdelivr.net/npm/swipejs@2.3.1/swipe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <script src="script.js"></script>
-</body>
-</html> 
+  </body>
+</html>
